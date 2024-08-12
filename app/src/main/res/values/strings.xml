@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Git Application</string>
+    <string name="sign_in">SIGN IN</string>
+    <string name="personal_access_token">Personal access token</string>
+</resources>
