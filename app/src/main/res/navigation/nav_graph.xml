@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/AuthFragment">
+
+    <fragment
+        android:id="@+id/AuthFragment"
+        android:name="com.example.gitapplication.AuthFragment"
+        tools:layout="@layout/fragment_auth">
+        <action
+            android:id="@+id/actionAuthToRepos"
+            app:destination="@+id/ReposFragment"
+        />
+    </fragment>
+
+    <fragment
+        android:id="@+id/ReposFragment"
+        android:name= "com.example.gitapplication.RepositoriesListFragment"
+        tools:layout="@layout/recyclerview_fragment">
+    </fragment>
+
+</navigation>

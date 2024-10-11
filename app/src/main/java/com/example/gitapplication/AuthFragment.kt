@@ -6,32 +6,41 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.gitapplication.databinding.FragmentAuthBinding
 
 
-class AuthFragment : Fragment() {
-
-
-    companion object {
-        fun newInstance() = AuthFragment()
-    }
+class AuthFragment : Fragment(R.layout.fragment_auth) {
+    
 
     private val viewModel: AuthViewModel by viewModels()
+    private var binding: FragmentAuthBinding? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    /**
+     * Вызывается для создания компонентов внутри фрагмента
+     */
 
-        // TODO: Use the ViewModel
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        //Используем View Binding для связывания верстки с кодом
+        binding = FragmentAuthBinding.bind(view)
+
+        // Устанавливаем click listener для кнопки
+        binding!!.buttonAuth.setOnClickListener {
+            val accessToken = binding!!.textInputEditTextAuth.text.toString()
+            viewModel.setAccessToken(accessToken)
+
+            findNavController().navigate(AuthFragmentDirections.actionAuthToRepos())
+        }
 
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val binding = FragmentAuthBinding.inflate(inflater, container, false)
-        var mTextInputEditTextAuth = binding.textInputEditTextAuth
-        var mButtonAuth = binding.buttonAuth
-        return binding.root
+    /**
+     * Чистим binding, чтобы не было утечки двнных при пересоздании экрана
+     */
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
+
 }
