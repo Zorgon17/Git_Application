@@ -1,21 +1,16 @@
 package com.example.gitapplication.pojomodel
 
-import com.example.gitapplication.pojomodel.Repository.RepositoryItem
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-/**
- * Model класс, который используется как модель JSON
- */
-// возможно придется переделать
-class Repository : ArrayList<RepositoryItem>(){
-    data class RepositoryItem(
-        @SerializedName("id")
-        val id: Int?,
-        @SerializedName("name")
-        val name: String?,
-        @SerializedName("language")
-        val language: String?,
-        @SerializedName("description")
-        val description: String?
-    )
-}
+@Serializable
+data class Repository(
+    @SerialName("id")
+    val id: Int?,
+    @SerialName("name")
+    val name: String?,
+    @SerialName("language")
+    val language: String?,
+    @SerialName("description")
+    val description: String?,
+)
