@@ -21,5 +21,5 @@ data class Repository(
     @SerialName("forks_count")
     val countOfForks: Int?,
     @SerialName("stargazers_count")
-    val countOfStars:Int?
+        val countOfStars:Int?
 )

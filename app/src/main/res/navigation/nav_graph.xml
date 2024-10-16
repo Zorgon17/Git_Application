@@ -27,6 +27,22 @@
         android:id="@+id/DescriptionFragment"
         android:name="com.example.gitapplication.DescriptionFragment"
         tools:layout="@layout/fragment_description">
+
+        <argument
+            android:name="repositoryName"
+            app:argType="string" />
+        <argument
+            android:name="link"
+            app:argType="string" />
+        <argument
+            android:name="amountOfStars"
+            app:argType="string" />
+        <argument
+            android:name="amountOfForks"
+            app:argType="string" />
+        <argument
+            android:name="amountOfWatchers"
+            app:argType="string" />
     </fragment>
 
 </navigation>

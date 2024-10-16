@@ -1,121 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:id="@+id/link"
+    <!-- AppBar -->
+    <include
+        layout="@layout/appbar"
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ссылка"
-        android:textSize="18sp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/lessence"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Права?"
-        android:textSize="18sp" />
-
+    <!-- Контент под AppBar -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/appbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Блок с ссылкой -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="top|start">
 
             <ImageView
-                android:id="@+id/icon_star"
+                android:id="@+id/link_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:contentDescription="Star Icon"
-                android:src="@drawable/ic_star" />
+                android:contentDescription="Link Icon"
+                android:src="@drawable/ic_link" />
 
             <TextView
-                android:id="@+id/star_label"
+                android:id="@+id/link"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="258"
-                android:textColor="@color/star" />
-
-            <TextView
-                android:id="@+id/star_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="stars" />
+                android:text="Ссылка"
+                android:textColor="@color/link"
+                android:textSize="18sp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <!-- Описание -->
+        <TextView
+            android:id="@+id/lessence"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_marginTop="16dp"
+            android:text="Описание репозитория"
+            android:textSize="18sp" />
 
-            <ImageView
-                android:id="@+id/icon_fork"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="Fork Icon"
-                android:src="@drawable/ic_fork" />
-
-            <TextView
-                android:id="@+id/fork_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="30"
-                android:textColor="@color/fork" />
-
-            <TextView
-                android:id="@+id/fork_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="forks" />
-        </LinearLayout>
-
+        <!-- Статистика -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
 
-            <ImageView
-                android:id="@+id/icon_watcher"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="Watcher Icon"
-                android:src="@drawable/ic_watcher" />
-
-            <TextView
-                android:id="@+id/watcher_label"
-                android:layout_width="wrap_content"
+            <!-- Блок со звездами -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="10"
-                android:textColor="@color/watcher" />
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/watcher_count"
-                android:layout_width="wrap_content"
+                <ImageView
+                    android:id="@+id/icon_star"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Star Icon"
+                    android:src="@drawable/ic_star" />
+
+                <TextView
+                    android:id="@+id/star_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="258"
+                    android:textColor="@color/star" />
+
+                <TextView
+                    android:id="@+id/star_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="stars" />
+            </LinearLayout>
+
+            <!-- Блок с форками -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="watchers" />
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/icon_fork"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Fork Icon"
+                    android:src="@drawable/ic_fork" />
+
+                <TextView
+                    android:id="@+id/fork_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="30"
+                    android:textColor="@color/fork" />
+
+                <TextView
+                    android:id="@+id/fork_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="forks" />
+            </LinearLayout>
+
+            <!-- Блок с наблюдателями -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/icon_watcher"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Watcher Icon"
+                    android:src="@drawable/ic_watcher" />
+
+                <TextView
+                    android:id="@+id/watcher_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="10"
+                    android:textColor="@color/watcher" />
+
+                <TextView
+                    android:id="@+id/watcher_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="watchers" />
+            </LinearLayout>
         </LinearLayout>
-
     </LinearLayout>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

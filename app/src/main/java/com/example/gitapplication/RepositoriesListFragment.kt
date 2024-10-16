@@ -24,16 +24,16 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
 
     private lateinit var gitHubClient: GitHubClient
 
-    @SuppressLint("MissingInflatedId")
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.recyclerview_fragment, container, false)
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        val toolbar = view.findViewById<Toolbar>(R.id.appbar)
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
         return view
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenu(true)
+        (activity as AppCompatActivity).supportActionBar?.title = "Repositories"
 
         val repoRecycler: RecyclerView = view.findViewById(R.id.repositoryRecyclerView)
         val repoAdapter = RepoAdapter(this)
@@ -55,8 +55,20 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
     }
 
     override fun onItemClick(repository: Repository) {
+        // Отображаем сообщение с именем репозитория
         Toast.makeText(context, "Вы открыли репозиторий: ${repository.name}", Toast.LENGTH_SHORT).show()
-        findNavController().navigate(RepositoriesListFragmentDirections.actionReposToDescr())
 
+        // Создаем action и передаем необходимые аргументы
+        val action = RepositoriesListFragmentDirections.actionReposToDescr(
+            repositoryName = repository.name.toString(),
+            link = repository.repositoryUrl.toString(),
+            amountOfStars = repository.countOfStars.toString(),
+            amountOfForks = repository.countOfForks.toString(),
+            amountOfWatchers = repository.countOfWatchers.toString()
+        )
+
+        // Переходим на DescriptionFragment с передачей аргументов
+        findNavController().navigate(action)
     }
+
 }
