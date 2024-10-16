@@ -13,4 +13,13 @@ data class Repository(
     val language: String?,
     @SerialName("description")
     val description: String?,
+    
+    @SerialName("html_url")
+    val repositoryUrl: String?,
+    @SerialName("watchers_count")
+    val countOfWatchers: Int?,
+    @SerialName("forks_count")
+    val countOfForks: Int?,
+    @SerialName("stargazers_count")
+    val countOfStars:Int?
 )

@@ -1,4 +1,6 @@
+import org.gradle.internal.impldep.bsh.commands.dir
 import org.jetbrains.kotlin.storage.CacheResetOnProcessCanceled.enabled
+import java.util.regex.Pattern.compile
 
 plugins {
     alias(libs.plugins.android.application)
@@ -64,6 +66,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    //Для Toolbar
+    implementation ("androidx.appcompat:appcompat:1.2.0")
+    implementation ("com.google.android.material:material:1.2.1")
+
     //Dagger-Hilt
     implementation ("com.google.dagger:hilt-android:2.51.1")
     kapt ("com.google.dagger:hilt-compiler:2.51.1")

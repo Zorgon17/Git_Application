@@ -15,7 +15,7 @@ import com.example.gitapplication.pojomodel.Repository
  *
  * Адаптер управляет данными и связывает их с ViewHolders.
  */
-class RepoAdapter : RecyclerView.Adapter<RepoAdapter.RepoViewHolder>() {
+class RepoAdapter(private val listener: OnItemClickListener) : RecyclerView.Adapter<RepoAdapter.RepoViewHolder>() {
 
     /**
      * Этот код создает свойство data для хранения списка Репозиториев.
@@ -48,6 +48,10 @@ class RepoAdapter : RecyclerView.Adapter<RepoAdapter.RepoViewHolder>() {
         holder.repositoryName.text = repository.name
         holder.repositoryLang.text = repository.language
         holder.repositoryDescr.text = repository.description
+
+        holder.itemView.setOnClickListener {
+            listener.onItemClick(repository) // Вызываем метод интерфейса с переданным объектом
+        }
     }
 
     /**
