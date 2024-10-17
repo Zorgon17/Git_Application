@@ -1,20 +1,18 @@
 package com.example.gitapplication
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
-import androidx.fragment.app.Fragment
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gitapplication.adapter.OnItemClickListener
 import com.example.gitapplication.adapter.RepoAdapter
+import com.example.gitapplication.databinding.RecyclerviewFragmentBinding
 import com.example.gitapplication.network.GitHubClient
 import com.example.gitapplication.pojomodel.Repository
 import kotlinx.coroutines.launch
@@ -23,42 +21,47 @@ import kotlinx.coroutines.launch
 class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnItemClickListener {
 
     private lateinit var gitHubClient: GitHubClient
+    private var binding: RecyclerviewFragmentBinding? = null
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.recyclerview_fragment, container, false)
-        val toolbar = view.findViewById<Toolbar>(R.id.appbar)
-        (activity as AppCompatActivity).setSupportActionBar(toolbar)
-        return view
-    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Инициализация binding
+        binding = RecyclerviewFragmentBinding.bind(view)
+
+        // Настройка Toolbar
+        val toolbar: Toolbar = binding?.appbar?.toolbar ?: return
+        (activity as AppCompatActivity).setSupportActionBar(toolbar)
+
+        // Установка заголовка
         (activity as AppCompatActivity).supportActionBar?.title = "Repositories"
 
-        val repoRecycler: RecyclerView = view.findViewById(R.id.repositoryRecyclerView)
+        //непосредственно биндим кнопку и appbar при нажатии сбрасываем весь стек навигации к AuthFragment
+        binding?.appbar?.actionButton?.setOnClickListener {
+            findNavController().popBackStack(R.id.AuthFragment, false)
+        }
+
+        //биндим RecyclerView
+        val repoRecycler: RecyclerView = binding!!.repositoryRecyclerView
         val repoAdapter = RepoAdapter(this)
 
-
-        /**
-         * LayoutManager - ответственен за расположение элементов внутри RecyclerView
-         */
+        // Устанавливаем LayoutManager и адаптер
         repoRecycler.layoutManager = LinearLayoutManager(context)
         repoRecycler.adapter = repoAdapter
 
-        gitHubClient = GitHubClient("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")
+        gitHubClient =
+            GitHubClient("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")
 
         lifecycleScope.launch {
             val repos = gitHubClient.getFirstTenRepositories("all")
             repoAdapter.data = repos
         }
-
     }
 
     override fun onItemClick(repository: Repository) {
-        // Отображаем сообщение с именем репозитория
-        Toast.makeText(context, "Вы открыли репозиторий: ${repository.name}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Вы открыли репозиторий: ${repository.name}", Toast.LENGTH_SHORT)
+            .show()
 
-        // Создаем action и передаем необходимые аргументы
         val action = RepositoriesListFragmentDirections.actionReposToDescr(
             repositoryName = repository.name.toString(),
             link = repository.repositoryUrl.toString(),
@@ -67,8 +70,11 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
             amountOfWatchers = repository.countOfWatchers.toString()
         )
 
-        // Переходим на DescriptionFragment с передачей аргументов
         findNavController().navigate(action)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null // Освобождаем binding
+    }
 }

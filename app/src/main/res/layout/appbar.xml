@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
@@ -13,6 +14,6 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Action Button"
         android:padding="8dp"
-        android:src="@drawable/ic_back_to_start" />
+        android:src="@drawable/ic_back_to_start"/>
 
 </androidx.appcompat.widget.Toolbar>

@@ -10,39 +10,39 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.gitapplication.databinding.FragmentDescriptionBinding
 
 class DescriptionFragment : Fragment(R.layout.fragment_description) {
 
-    private val viewModel: DescriptionViewModel by viewModels()
     private var binding: FragmentDescriptionBinding? = null
     private val args: DescriptionFragmentArgs by navArgs()
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_description, container, false)
-        val toolbar = view.findViewById<Toolbar>(R.id.appbar)
-        (activity as AppCompatActivity).setSupportActionBar(toolbar)
-
-        toolbar.setNavigationIcon(R.drawable.ic_back_stack)
-        toolbar.setNavigationOnClickListener {
-            requireActivity().onBackPressed()
-        }
-
-        return view
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // Используем View Binding для связывания верстки с кодом
         binding = FragmentDescriptionBinding.bind(view)
 
-        // Устанавливаем заголовок из имени репозитория
+        // Настройка Toolbar
+        val toolbar: Toolbar = binding?.appbar?.toolbar ?: return
+        (activity as AppCompatActivity).setSupportActionBar(toolbar)
+
+        // Установка заголовка
         (activity as AppCompatActivity).supportActionBar?.title = args.repositoryName
+
+        binding?.appbar?.actionButton?.setOnClickListener {
+            findNavController().popBackStack(R.id.AuthFragment, false)
+        }
+
+        // Включаем кнопку "Назад" в ActionBar
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        // Устанавливаем слушатель на кнопку "Назад"
+        toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
 
         // Устанавливаем текстовые значения из аргументов
         binding?.link?.text = args.link
