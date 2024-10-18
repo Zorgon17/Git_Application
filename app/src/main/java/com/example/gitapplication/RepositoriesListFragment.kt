@@ -50,7 +50,7 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
         repoRecycler.adapter = repoAdapter
 
         gitHubClient =
-            GitHubClient("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")
+            GitHubClient("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")
 
         lifecycleScope.launch {
             val repos = gitHubClient.getFirstTenRepositories("all")
@@ -67,7 +67,8 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
             link = repository.repositoryUrl.toString(),
             amountOfStars = repository.countOfStars.toString(),
             amountOfForks = repository.countOfForks.toString(),
-            amountOfWatchers = repository.countOfWatchers.toString()
+            amountOfWatchers = repository.countOfWatchers.toString(),
+            owner = repository.owner?.login.toString()
         )
 
         findNavController().navigate(action)

@@ -10,14 +10,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.gitapplication.databinding.FragmentDescriptionBinding
+import com.example.gitapplication.network.GitHubClient
+import kotlinx.coroutines.launch
 
 class DescriptionFragment : Fragment(R.layout.fragment_description) {
 
     private var binding: FragmentDescriptionBinding? = null
     private val args: DescriptionFragmentArgs by navArgs()
+    private lateinit var gitHubClient: GitHubClient
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -25,12 +29,34 @@ class DescriptionFragment : Fragment(R.layout.fragment_description) {
         // Используем View Binding для связывания верстки с кодом
         binding = FragmentDescriptionBinding.bind(view)
 
+        // Устанавливаем текстовые значения из аргументов
+        val owner: String = args.owner
+        val repositoryName: String = args.repositoryName
+        binding?.link?.text = args.link
+        binding?.lessence?.text = "Описание репозитория"
+        binding?.starCount?.text = args.amountOfStars
+        binding?.forkCount?.text = args.amountOfForks
+        binding?.watcherCount?.text = args.amountOfWatchers
+
+        gitHubClient =
+            GitHubClient("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")
+
+        lifecycleScope.launch {
+            val readmeContent = gitHubClient.getReadMe(owner, repositoryName)
+            if (readmeContent != null) {
+                binding?.readmeTextView?.text = readmeContent
+            } else {
+                binding?.readmeTextView?.text = "ReadMe нет:((("
+            }
+        }
+
         // Настройка Toolbar
         val toolbar: Toolbar = binding?.appbar?.toolbar ?: return
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
 
+
         // Установка заголовка
-        (activity as AppCompatActivity).supportActionBar?.title = args.repositoryName
+        (activity as AppCompatActivity).supportActionBar?.title = repositoryName
 
         binding?.appbar?.actionButton?.setOnClickListener {
             findNavController().popBackStack(R.id.AuthFragment, false)
@@ -44,19 +70,13 @@ class DescriptionFragment : Fragment(R.layout.fragment_description) {
             findNavController().popBackStack()
         }
 
-        // Устанавливаем текстовые значения из аргументов
-        binding?.link?.text = args.link
-        binding?.lessence?.text = "Описание репозитория"
-        binding?.starCount?.text = args.amountOfStars
-        binding?.forkCount?.text = args.amountOfForks
-        binding?.watcherCount?.text = args.amountOfWatchers
-
         // Устанавливаем слушатель клика для текстового поля ссылки
         binding?.link?.setOnClickListener {
             val url = args.link
             openLink(url) // Открываем ссылку
         }
     }
+
 
     /**
      * Функция, делающая ссылку в приложении кликабельной

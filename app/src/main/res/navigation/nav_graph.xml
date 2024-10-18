@@ -43,6 +43,9 @@
         <argument
             android:name="amountOfWatchers"
             app:argType="string" />
+        <argument
+            android:name="owner"
+            app:argType="string" />
     </fragment>
 
 </navigation>

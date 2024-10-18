@@ -1,5 +1,6 @@
 package com.example.gitapplication.network
 
+import ReadmeResponse
 import android.util.Log
 import com.example.gitapplication.pojomodel.Repository
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -9,14 +10,23 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface GitHubService {
+    //запрос для получения информации о репозиториях
     @GET("user/repos")
     suspend fun getRepos(
         @Query("visibility") visibility: String = "all",
         @Query("per_page") perPage: Int = 10
     ): List<Repository>
+
+    //запрос для получения ReadMe файла
+    @GET("repos/{owner}/{nameOfRepo}/readme")
+    suspend fun getReadMe(
+        @Path("owner") owner: String,
+        @Path("nameOfRepo") nameOfRepo: String
+    ): ReadmeResponse
 }
 
 
@@ -55,6 +65,18 @@ class GitHubClient(private val token: String) {
 
         apiService = retrofit.create(GitHubService::class.java)
     }
+
+    suspend fun getReadMe(owner: String, nameOfRepo: String): String? {
+        return try {
+            val response = apiService.getReadMe(owner, nameOfRepo)
+            Log.d("GitHubClient", "ReadmeResponse: $response")
+            response.decodedContent
+        } catch (e: Exception) {
+            Log.e("GitHubClient", "Error fetching README: ${e.message}", e)
+            null
+        }
+    }
+
 
     suspend fun getFirstTenRepositories(visibility: String): List<Repository> {
         return try {
