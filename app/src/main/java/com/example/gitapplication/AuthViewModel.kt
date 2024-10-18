@@ -1,16 +1,22 @@
 package com.example.gitapplication
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavDirections
 
 class AuthViewModel : ViewModel() {
 
-    private val _accessToken = MutableLiveData<String?>()
+    private var accessToken: String? = null
 
-    val accessToken: LiveData<String?> = _accessToken
+    fun setAccessToken(token: String) {
+        accessToken = token
+    }
 
-    fun setAccessToken(accessToken: String) {
-        _accessToken.value = accessToken
-        }
+    fun getAccessToken(): String? {
+        return accessToken
+    }
+
+    fun getNavigationAction(): NavDirections {
+        return AuthFragmentDirections.actionAuthToRepos()
+    }
 }
+

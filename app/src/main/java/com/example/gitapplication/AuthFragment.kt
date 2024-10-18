@@ -1,9 +1,7 @@
 package com.example.gitapplication
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -11,7 +9,7 @@ import com.example.gitapplication.databinding.FragmentAuthBinding
 
 
 class AuthFragment : Fragment(R.layout.fragment_auth) {
-    
+
 
     private val viewModel: AuthViewModel by viewModels()
     private var binding: FragmentAuthBinding? = null
@@ -30,10 +28,12 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
             val accessToken = binding!!.textInputEditTextAuth.text.toString()
             viewModel.setAccessToken(accessToken)
 
-            findNavController().navigate(AuthFragmentDirections.actionAuthToRepos())
-        }
 
+            val action = viewModel.getNavigationAction()
+            findNavController().navigate(action)
+        }
     }
+
 
     /**
      * Чистим binding, чтобы не было утечки двнных при пересоздании экрана
