@@ -21,6 +21,9 @@
         <action
             android:id="@+id/actionReposToDescr"
             app:destination="@+id/DescriptionFragment" />
+        <argument
+            android:name="token"
+            app:argType="string" />
     </fragment>
 
     <fragment
@@ -45,6 +48,9 @@
             app:argType="string" />
         <argument
             android:name="owner"
+            app:argType="string" />
+        <argument
+            android:name="token"
             app:argType="string" />
     </fragment>
 

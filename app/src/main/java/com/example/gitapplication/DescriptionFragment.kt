@@ -32,6 +32,7 @@ class DescriptionFragment : Fragment(R.layout.fragment_description) {
         // Устанавливаем текстовые значения из аргументов
         val owner: String = args.owner
         val repositoryName: String = args.repositoryName
+        val token = args.token
         binding?.link?.text = args.link
         binding?.lessence?.text = "Описание репозитория"
         binding?.starCount?.text = args.amountOfStars
@@ -39,7 +40,7 @@ class DescriptionFragment : Fragment(R.layout.fragment_description) {
         binding?.watcherCount?.text = args.amountOfWatchers
 
         gitHubClient =
-            GitHubClient("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")
+            GitHubClient(token)
 
         lifecycleScope.launch {
             val readmeContent = gitHubClient.getReadMe(owner, repositoryName)

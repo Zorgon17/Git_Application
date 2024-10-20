@@ -3,6 +3,7 @@ package com.example.gitapplication.network
 import ReadmeResponse
 import android.util.Log
 import com.example.gitapplication.pojomodel.Repository
+import com.example.gitapplication.pojomodel.UserResponse
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -27,6 +28,10 @@ interface GitHubService {
         @Path("owner") owner: String,
         @Path("nameOfRepo") nameOfRepo: String
     ): ReadmeResponse
+
+    //запрос для проверки токена
+    @GET("user")
+    suspend fun getUser(): UserResponse
 }
 
 
@@ -66,6 +71,15 @@ class GitHubClient(private val token: String) {
         apiService = retrofit.create(GitHubService::class.java)
     }
 
+    suspend fun checkToken(): UserResponse? {
+        return try {
+            apiService.getUser()
+        } catch (e: Exception) {
+            Log.e("GitHubClient", "Invalid token: ${e.message}", e)
+            null
+        }
+    }
+    
     suspend fun getReadMe(owner: String, nameOfRepo: String): String? {
         return try {
             val response = apiService.getReadMe(owner, nameOfRepo)

@@ -8,6 +8,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gitapplication.adapter.OnItemClickListener
@@ -22,6 +23,8 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
 
     private lateinit var gitHubClient: GitHubClient
     private var binding: RecyclerviewFragmentBinding? = null
+    private val args: RepositoriesListFragmentArgs by navArgs()
+    private lateinit var token: String
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,6 +44,7 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
             findNavController().popBackStack(R.id.AuthFragment, false)
         }
 
+        token = args.token
         //биндим RecyclerView
         val repoRecycler: RecyclerView = binding!!.repositoryRecyclerView
         val repoAdapter = RepoAdapter(this)
@@ -49,8 +53,7 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
         repoRecycler.layoutManager = LinearLayoutManager(context)
         repoRecycler.adapter = repoAdapter
 
-        gitHubClient =
-            GitHubClient("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")
+        gitHubClient = GitHubClient(token)
 
         lifecycleScope.launch {
             val repos = gitHubClient.getFirstTenRepositories("all")
@@ -68,7 +71,8 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
             amountOfStars = repository.countOfStars.toString(),
             amountOfForks = repository.countOfForks.toString(),
             amountOfWatchers = repository.countOfWatchers.toString(),
-            owner = repository.owner?.login.toString()
+            owner = repository.owner?.login.toString(),
+            token = token
         )
 
         findNavController().navigate(action)
