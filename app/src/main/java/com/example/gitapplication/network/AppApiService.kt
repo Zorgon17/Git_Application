@@ -15,25 +15,24 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface GitHubService {
-    //запрос для получения информации о репозиториях
+    // запрос для получения информации о репозиториях
     @GET("user/repos")
     suspend fun getRepos(
         @Query("visibility") visibility: String = "all",
         @Query("per_page") perPage: Int = 10
     ): List<Repository>
 
-    //запрос для получения ReadMe файла
+    // запрос для получения ReadMe файла
     @GET("repos/{owner}/{nameOfRepo}/readme")
     suspend fun getReadMe(
         @Path("owner") owner: String,
         @Path("nameOfRepo") nameOfRepo: String
     ): ReadmeResponse
 
-    //запрос для проверки токена
+    // запрос для проверки токена
     @GET("user")
     suspend fun getUser(): UserResponse
 }
-
 
 class GitHubClient(private val token: String) {
     private val apiService: GitHubService
@@ -42,7 +41,6 @@ class GitHubClient(private val token: String) {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
-
 
         // Создаем OkHttpClient и добавляем интерсепторы
         val client = OkHttpClient.Builder()
@@ -58,15 +56,13 @@ class GitHubClient(private val token: String) {
         val json = Json {
             ignoreUnknownKeys = true // игнорируем неописанные поля
         }
+
         // Создаем Retrofit
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(
-                json.asConverterFactory("application/json".toMediaType())
-            )
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .client(client)
             .build()
-
 
         apiService = retrofit.create(GitHubService::class.java)
     }
@@ -79,7 +75,7 @@ class GitHubClient(private val token: String) {
             null
         }
     }
-    
+
     suspend fun getReadMe(owner: String, nameOfRepo: String): String? {
         return try {
             val response = apiService.getReadMe(owner, nameOfRepo)
@@ -90,7 +86,6 @@ class GitHubClient(private val token: String) {
             null
         }
     }
-
 
     suspend fun getFirstTenRepositories(visibility: String): List<Repository> {
         return try {

@@ -15,13 +15,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.gitapplication.databinding.FragmentDescriptionBinding
 import com.example.gitapplication.network.GitHubClient
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class DescriptionFragment : Fragment(R.layout.fragment_description) {
 
     private var binding: FragmentDescriptionBinding? = null
     private val args: DescriptionFragmentArgs by navArgs()
-    private lateinit var gitHubClient: GitHubClient
+    @Inject
+    lateinit var gitHubClient: GitHubClient
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -32,22 +36,18 @@ class DescriptionFragment : Fragment(R.layout.fragment_description) {
         // Устанавливаем текстовые значения из аргументов
         val owner: String = args.owner
         val repositoryName: String = args.repositoryName
-        val token = args.token
         binding?.link?.text = args.link
         binding?.lessence?.text = "Описание репозитория"
         binding?.starCount?.text = args.amountOfStars
         binding?.forkCount?.text = args.amountOfForks
         binding?.watcherCount?.text = args.amountOfWatchers
 
-        gitHubClient =
-            GitHubClient(token)
-
         lifecycleScope.launch {
             val readmeContent = gitHubClient.getReadMe(owner, repositoryName)
             if (readmeContent != null) {
                 binding?.readmeTextView?.text = readmeContent
             } else {
-                binding?.readmeTextView?.text = "ReadMe нет:((("
+                binding?.readmeTextView?.text = "У данного приложения нет ReadMe"
             }
         }
 

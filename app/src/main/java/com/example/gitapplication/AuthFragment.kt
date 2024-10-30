@@ -4,22 +4,31 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.gitapplication.databinding.FragmentAuthBinding
+import com.example.gitapplication.network.GitHubClient
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+
+@AndroidEntryPoint
 class AuthFragment : Fragment(R.layout.fragment_auth) {
 
-    private val viewModel: AuthViewModel by viewModels()
     private var binding: FragmentAuthBinding? = null
     private lateinit var prefsEditor: SharedPreferences.Editor
     private lateinit var sharedPref: SharedPreferences
 
+    @Inject
+    lateinit var gitHubClient: GitHubClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Инициализируем SharedPreferences здесь
         sharedPref = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefsEditor = sharedPref.edit()
     }
@@ -27,31 +36,41 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Используем View Binding для связывания разметки с кодом
         binding = FragmentAuthBinding.bind(view)
-
         val textInputEditTextAuth = binding!!.textInputEditTextAuth
 
-        // Восстанавливаем токен из SharedPreferences, если он есть
         val restoredToken = sharedPref.getString(TOKEN_PREF_NAME, "")
         textInputEditTextAuth.setText(restoredToken)
 
-        // Сохраняем текст в SharedPreferences при изменении текста
         textInputEditTextAuth.doOnTextChanged { text, _, _, _ ->
             prefsEditor.putString(TOKEN_PREF_NAME, text.toString())
         }
 
-        // Устанавливаем обработчик кликов для кнопки
         binding!!.buttonAuth.setOnClickListener {
             val accessToken = textInputEditTextAuth.text.toString()
-            viewModel.setAccessToken(accessToken)
-            findNavController().navigate(AuthFragmentDirections.actionAuthToRepos(token = accessToken))
+            if (accessToken.isBlank()) {
+                binding!!.textInputEditTextAuth.error = "Токен не может быть пустым"
+            } else {
+                // Здесь создаем новый экземпляр GitHubClient с актуальным токеном
+                val gitHubClientWithToken = GitHubClient(accessToken)
+
+                lifecycleScope.launch {
+                    val userResponse = gitHubClientWithToken.checkToken()
+
+                    if (userResponse != null) {
+                        binding!!.textInputEditTextAuth.error = null
+                        Toast.makeText(requireContext(), "Привет, дорогой ${userResponse.login}", Toast.LENGTH_SHORT).show()
+                        findNavController().navigate(AuthFragmentDirections.actionAuthToRepos())
+                    } else {
+                        binding!!.textInputEditTextAuth.error = "Неверный токен"
+                    }
+                }
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        // Применяем изменения в SharedPreferences
         prefsEditor.apply()
     }
 

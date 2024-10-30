@@ -8,7 +8,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gitapplication.adapter.OnItemClickListener
@@ -16,15 +15,16 @@ import com.example.gitapplication.adapter.RepoAdapter
 import com.example.gitapplication.databinding.RecyclerviewFragmentBinding
 import com.example.gitapplication.network.GitHubClient
 import com.example.gitapplication.pojomodel.Repository
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnItemClickListener {
 
-    private lateinit var gitHubClient: GitHubClient
+    @Inject
+    lateinit var gitHubClient: GitHubClient
     private var binding: RecyclerviewFragmentBinding? = null
-    private val args: RepositoriesListFragmentArgs by navArgs()
-    private lateinit var token: String
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -44,7 +44,6 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
             findNavController().popBackStack(R.id.AuthFragment, false)
         }
 
-        token = args.token
         //биндим RecyclerView
         val repoRecycler: RecyclerView = binding!!.repositoryRecyclerView
         val repoAdapter = RepoAdapter(this)
@@ -52,8 +51,6 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
         // Устанавливаем LayoutManager и адаптер
         repoRecycler.layoutManager = LinearLayoutManager(context)
         repoRecycler.adapter = repoAdapter
-
-        gitHubClient = GitHubClient(token)
 
         lifecycleScope.launch {
             val repos = gitHubClient.getFirstTenRepositories("all")
@@ -71,8 +68,7 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
             amountOfStars = repository.countOfStars.toString(),
             amountOfForks = repository.countOfForks.toString(),
             amountOfWatchers = repository.countOfWatchers.toString(),
-            owner = repository.owner?.login.toString(),
-            token = token
+            owner = repository.owner?.login.toString()
         )
 
         findNavController().navigate(action)
