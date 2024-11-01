@@ -8,24 +8,22 @@ import android.widget.Toast
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.gitapplication.databinding.FragmentAuthBinding
-import com.example.gitapplication.network.GitHubClient
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
 
 @AndroidEntryPoint
 class AuthFragment : Fragment(R.layout.fragment_auth) {
 
+    private val viewModel: AuthViewModel by viewModels()
+
     private var binding: FragmentAuthBinding? = null
     private lateinit var prefsEditor: SharedPreferences.Editor
     private lateinit var sharedPref: SharedPreferences
-
-    @Inject
-    lateinit var gitHubClient: GitHubClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,36 +34,46 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //биндим кнопку
         binding = FragmentAuthBinding.bind(view)
         val textInputEditTextAuth = binding!!.textInputEditTextAuth
 
+        //проверяем наличие токена в SharedPreferences
         val restoredToken = sharedPref.getString(TOKEN_PREF_NAME, "")
         textInputEditTextAuth.setText(restoredToken)
 
+        // Сохраняем токен при каждом изменении
+        // (если пользователь при авторизации свернет приложение, введенное значение не удалиться)
         textInputEditTextAuth.doOnTextChanged { text, _, _, _ ->
             prefsEditor.putString(TOKEN_PREF_NAME, text.toString())
         }
 
-        binding!!.buttonAuth.setOnClickListener {
-            val accessToken = textInputEditTextAuth.text.toString()
-            if (accessToken.isBlank()) {
-                binding!!.textInputEditTextAuth.error = "Токен не может быть пустым"
-            } else {
-                // Здесь создаем новый экземпляр GitHubClient с актуальным токеном
-                val gitHubClientWithToken = GitHubClient(accessToken)
-
-                lifecycleScope.launch {
-                    val userResponse = gitHubClientWithToken.checkToken()
-
-                    if (userResponse != null) {
-                        binding!!.textInputEditTextAuth.error = null
-                        Toast.makeText(requireContext(), "Привет, дорогой ${userResponse.login}", Toast.LENGTH_SHORT).show()
-                        findNavController().navigate(AuthFragmentDirections.actionAuthToRepos())
-                    } else {
-                        binding!!.textInputEditTextAuth.error = "Неверный токен"
+        // Наблюдаем за состоянием аутентификации
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.authFragmentUiState.collect { state ->
+                    when (state) {
+                        is AuthViewModel.AuthState.Idle -> {
+                            // Начальное состояние, загружается экран
+                        }
+                        is AuthViewModel.AuthState.Loading -> {
+                            // Отображаем индикатор загрузки
+                        }
+                        is AuthViewModel.AuthState.Success -> {
+                            Toast.makeText(requireContext(), "Привет, дорогой ${state.login}", Toast.LENGTH_SHORT).show()
+                            findNavController().navigate(AuthFragmentDirections.actionAuthToRepos())
+                        }
+                        is AuthViewModel.AuthState.Error -> {
+                            binding!!.textInputEditTextAuth.error = state.message
+                        }
                     }
                 }
             }
+        }
+        // Запускаем проверку токена при нажатии на кнопку
+        binding!!.buttonAuth.setOnClickListener {
+            val accessToken = textInputEditTextAuth.text.toString()
+            viewModel.checkToken(accessToken)
         }
     }
 

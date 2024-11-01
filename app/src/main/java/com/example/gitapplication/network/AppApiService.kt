@@ -13,6 +13,7 @@ import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import javax.inject.Inject
 
 interface GitHubService {
     // запрос для получения информации о репозиториях
@@ -34,7 +35,7 @@ interface GitHubService {
     suspend fun getUser(): UserResponse
 }
 
-class GitHubClient(private val token: String) {
+class GitHubClient @Inject constructor(private val token: String) {
     private val apiService: GitHubService
 
     init {

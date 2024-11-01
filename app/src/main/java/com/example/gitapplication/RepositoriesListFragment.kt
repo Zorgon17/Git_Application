@@ -6,29 +6,30 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.gitapplication.RepositoriesListViewModel.RepositoriesListState
 import com.example.gitapplication.adapter.OnItemClickListener
 import com.example.gitapplication.adapter.RepoAdapter
 import com.example.gitapplication.databinding.RecyclerviewFragmentBinding
-import com.example.gitapplication.network.GitHubClient
 import com.example.gitapplication.pojomodel.Repository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnItemClickListener {
 
-    @Inject
-    lateinit var gitHubClient: GitHubClient
+    private val viewModel: RepositoriesListViewModel by viewModels()
+
     private var binding: RecyclerviewFragmentBinding? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         // Инициализация binding
         binding = RecyclerviewFragmentBinding.bind(view)
 
@@ -52,9 +53,24 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
         repoRecycler.layoutManager = LinearLayoutManager(context)
         repoRecycler.adapter = repoAdapter
 
-        lifecycleScope.launch {
-            val repos = gitHubClient.getFirstTenRepositories("all")
-            repoAdapter.data = repos
+        viewLifecycleOwner.lifecycleScope.launch{
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.repoListUiState.collect { state ->
+                    when(state){
+                        is RepositoriesListState.Loading -> {
+                            // Показать экран загрузки
+                        }
+                        is RepositoriesListState.Success -> {
+                            // Обновить данные адаптера
+                            repoAdapter.data = state.repositories
+                        }
+                        is RepositoriesListState.Error -> {
+                            // Показать сообщение об ошибке
+                            Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
         }
     }
 

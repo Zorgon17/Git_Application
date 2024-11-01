@@ -3,9 +3,7 @@ package com.example.gitapplication
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -14,19 +12,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.gitapplication.databinding.FragmentDescriptionBinding
-import com.example.gitapplication.network.GitHubClient
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class DescriptionFragment : Fragment(R.layout.fragment_description) {
 
-    private var binding: FragmentDescriptionBinding? = null
     private val args: DescriptionFragmentArgs by navArgs()
-    @Inject
-    lateinit var gitHubClient: GitHubClient
+    private val viewModel: DescriptionViewModel by viewModels()
 
+    private var binding: FragmentDescriptionBinding? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -42,26 +37,12 @@ class DescriptionFragment : Fragment(R.layout.fragment_description) {
         binding?.forkCount?.text = args.amountOfForks
         binding?.watcherCount?.text = args.amountOfWatchers
 
-        lifecycleScope.launch {
-            val readmeContent = gitHubClient.getReadMe(owner, repositoryName)
-            if (readmeContent != null) {
-                binding?.readmeTextView?.text = readmeContent
-            } else {
-                binding?.readmeTextView?.text = "У данного приложения нет ReadMe"
-            }
-        }
-
         // Настройка Toolbar
         val toolbar: Toolbar = binding?.appbar?.toolbar ?: return
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
 
-
         // Установка заголовка
         (activity as AppCompatActivity).supportActionBar?.title = repositoryName
-
-        binding?.appbar?.actionButton?.setOnClickListener {
-            findNavController().popBackStack(R.id.AuthFragment, false)
-        }
 
         // Включаем кнопку "Назад" в ActionBar
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -76,8 +57,27 @@ class DescriptionFragment : Fragment(R.layout.fragment_description) {
             val url = args.link
             openLink(url) // Открываем ссылку
         }
-    }
 
+        // Загружаем README
+        viewModel.loadReadme(owner, repositoryName)
+
+        // Наблюдаем за состоянием
+        lifecycleScope.launch {
+            viewModel.descriptionFragmentUiState.collect { state ->
+                when (state) {
+                    is DescriptionViewModel.DescriptionState.Loading -> {
+                        binding?.readmeTextView?.text = "Загрузка..."
+                    }
+                    is DescriptionViewModel.DescriptionState.Success -> {
+                        binding?.readmeTextView?.text = state.content
+                    }
+                    is DescriptionViewModel.DescriptionState.Error -> {
+                        binding?.readmeTextView?.text = state.message
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Функция, делающая ссылку в приложении кликабельной

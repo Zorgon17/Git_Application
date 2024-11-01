@@ -1,16 +1,47 @@
 package com.example.gitapplication
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.gitapplication.network.GitHubClient
+import com.example.gitapplication.network.GitHubRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AuthViewModel : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(private val repository: GitHubRepository): ViewModel() {
 
-    private val _accessToken = MutableLiveData<String?>()
+    private val _authFragmentUiStateInside = MutableStateFlow<AuthState>(AuthState.Idle)
+    val authFragmentUiState: StateFlow<AuthState> = _authFragmentUiStateInside
 
-    val accessToken: LiveData<String?> = _accessToken
+    fun checkToken(accessToken: String){
+        if (accessToken.isBlank()) {
+            _authFragmentUiStateInside.value = AuthState.Error("Токен не может быть пустым")
+            return
+        } else {
+            viewModelScope.launch {
+                _authFragmentUiStateInside.value = AuthState.Loading
+                val userResponse = repository.checkToken()
 
-    fun setAccessToken(accessToken: String) {
-        _accessToken.value = accessToken
+                if (userResponse != null) {
+                    _authFragmentUiStateInside.value = AuthState.Success(userResponse.login)
+                } else {
+                    _authFragmentUiStateInside.value = AuthState.Error("Неверный токен")
+                }
+            }
+
+
         }
+    }
+
+    sealed class AuthState {
+        object Idle : AuthState()              // Начальное состояние
+        object Loading : AuthState()           // Когда идет загрузка
+        data class Success(val login: String) : AuthState() // Успех с именем пользователя
+        data class Error(val message: String) : AuthState() // Ошибка с сообщением
+    }
+
 }
+
