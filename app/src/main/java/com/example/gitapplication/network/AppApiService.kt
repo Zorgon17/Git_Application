@@ -35,7 +35,7 @@ interface GitHubService {
     suspend fun getUser(): UserResponse
 }
 
-class GitHubClient @Inject constructor(private val token: String) {
+class GitHubClient @Inject constructor(private var token: String) {
     private val apiService: GitHubService
 
     init {

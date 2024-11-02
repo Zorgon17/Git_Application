@@ -13,17 +13,21 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.gitapplication.databinding.FragmentAuthBinding
+import com.example.gitapplication.network.GitHubClientFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthFragment : Fragment(R.layout.fragment_auth) {
 
     private val viewModel: AuthViewModel by viewModels()
-
     private var binding: FragmentAuthBinding? = null
     private lateinit var prefsEditor: SharedPreferences.Editor
     private lateinit var sharedPref: SharedPreferences
+
+    @Inject
+    lateinit var gitHubClientFactory: GitHubClientFactory  // Внедрение фабрики
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,18 +38,17 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //биндим кнопку
         binding = FragmentAuthBinding.bind(view)
         val textInputEditTextAuth = binding!!.textInputEditTextAuth
 
-        //проверяем наличие токена в SharedPreferences
+        // Получаем токен из SharedPreferences
         val restoredToken = sharedPref.getString(TOKEN_PREF_NAME, "")
         textInputEditTextAuth.setText(restoredToken)
 
         // Сохраняем токен при каждом изменении
-        // (если пользователь при авторизации свернет приложение, введенное значение не удалиться)
         textInputEditTextAuth.doOnTextChanged { text, _, _, _ ->
-            prefsEditor.putString(TOKEN_PREF_NAME, text.toString())
+            prefsEditor.putString(TOKEN_PREF_NAME, text.toString()).apply()
+            // GitHubClient автоматически обновится через фабрику при обращении к нему
         }
 
         // Наблюдаем за состоянием аутентификации
@@ -53,12 +56,8 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.authFragmentUiState.collect { state ->
                     when (state) {
-                        is AuthViewModel.AuthState.Idle -> {
-                            // Начальное состояние, загружается экран
-                        }
-                        is AuthViewModel.AuthState.Loading -> {
-                            // Отображаем индикатор загрузки
-                        }
+                        is AuthViewModel.AuthState.Idle -> { /* Начальное состояние */ }
+                        is AuthViewModel.AuthState.Loading -> { /* Показать индикатор загрузки */ }
                         is AuthViewModel.AuthState.Success -> {
                             Toast.makeText(requireContext(), "Привет, дорогой ${state.login}", Toast.LENGTH_SHORT).show()
                             findNavController().navigate(AuthFragmentDirections.actionAuthToRepos())
@@ -70,21 +69,19 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
                 }
             }
         }
-        // Запускаем проверку токена при нажатии на кнопку
+
+        // Обработка нажатия кнопки для аутентификации
         binding!!.buttonAuth.setOnClickListener {
             val accessToken = textInputEditTextAuth.text.toString()
-            viewModel.checkToken(accessToken)
+            prefsEditor.putString(TOKEN_PREF_NAME, accessToken).apply()
+            viewModel.checkToken(accessToken)  // передаем токен в ViewModel
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        prefsEditor.apply()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+        viewModel.resetState()
     }
 
     companion object {

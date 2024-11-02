@@ -51,6 +51,10 @@ class DescriptionFragment : Fragment(R.layout.fragment_description) {
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
+        //непосредственно биндим кнопку и appbar при нажатии сбрасываем весь стек навигации к AuthFragment
+        binding?.appbar?.actionButton?.setOnClickListener {
+            findNavController().popBackStack(R.id.AuthFragment, false)
+        }
 
         // Устанавливаем слушатель клика для текстового поля ссылки
         binding?.link?.setOnClickListener {

@@ -3,7 +3,8 @@ package com.example.gitapplication.di
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.gitapplication.network.GitHubClient
-import com.example.gitapplication.network.GitHubRepository // Import your repository
+import com.example.gitapplication.network.GitHubClientFactory
+import com.example.gitapplication.network.GitHubRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,15 +17,6 @@ import javax.inject.Singleton
 object AppModule {
 
     private const val PREFS_NAME = "pref_name"
-    private const val TOKEN_PREF_NAME = "token_pref_name"
-
-    @Provides
-    @Singleton
-    fun provideGitHubClient(sharedPreferences: SharedPreferences): GitHubClient {
-        val token = sharedPreferences.getString(TOKEN_PREF_NAME, null)
-            ?: throw IllegalArgumentException("Token not found") // Handle missing token
-        return GitHubClient(token)
-    }
 
     @Provides
     @Singleton
@@ -34,7 +26,13 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideGitHubClient(factory: GitHubClientFactory): GitHubClient {
+        return factory.createGitHubClient()
+    }
+
+    @Provides
+    @Singleton
     fun provideGitHubRepository(gitHubClient: GitHubClient): GitHubRepository {
-        return GitHubRepository(gitHubClient) // Create and return the repository instance
+        return GitHubRepository(gitHubClient)
     }
 }
