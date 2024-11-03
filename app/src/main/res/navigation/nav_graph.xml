@@ -21,7 +21,20 @@
         <action
             android:id="@+id/actionReposToDescr"
             app:destination="@+id/DescriptionFragment" />
+        <action
+            android:id="@+id/actionReposToEmpty"
+            app:destination="@+id/EmptyFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/EmptyFragment"
+        android:name="com.example.gitapplication.screens.emptyscreen.EmptyFragment"
+        tools:layout="@layout/empty_repository_fragment">
+        <action
+            android:id="@+id/actionEmptyToRepos"
+            app:destination="@+id/ReposFragment" />
+    </fragment>
+
 
     <fragment
         android:id="@+id/DescriptionFragment"

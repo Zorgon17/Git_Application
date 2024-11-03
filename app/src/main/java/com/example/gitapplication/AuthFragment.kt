@@ -57,7 +57,7 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
                 viewModel.authFragmentUiState.collect { state ->
                     when (state) {
                         is AuthViewModel.AuthState.Idle -> { /* Начальное состояние */ }
-                        is AuthViewModel.AuthState.Loading -> { /* Показать индикатор загрузки */ }
+                        is AuthViewModel.AuthState.Loading -> { binding!!.buttonAuth.showLoading() }
                         is AuthViewModel.AuthState.Success -> {
                             Toast.makeText(requireContext(), "Привет, дорогой ${state.login}", Toast.LENGTH_SHORT).show()
                             findNavController().navigate(AuthFragmentDirections.actionAuthToRepos())

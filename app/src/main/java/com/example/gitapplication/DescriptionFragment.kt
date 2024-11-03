@@ -70,9 +70,12 @@ class DescriptionFragment : Fragment(R.layout.fragment_description) {
             viewModel.descriptionFragmentUiState.collect { state ->
                 when (state) {
                     is DescriptionViewModel.DescriptionState.Loading -> {
-                        binding?.readmeTextView?.text = "Загрузка..."
+                        binding?.progressBar?.visibility = View.VISIBLE
+                        binding?.readmeTextView?.visibility = View.GONE
                     }
                     is DescriptionViewModel.DescriptionState.Success -> {
+                        binding?.progressBar?.visibility = View.GONE
+                        binding?.readmeTextView?.visibility = View.VISIBLE
                         binding?.readmeTextView?.text = state.content
                     }
                     is DescriptionViewModel.DescriptionState.Error -> {

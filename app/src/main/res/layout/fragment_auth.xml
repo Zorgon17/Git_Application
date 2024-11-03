@@ -30,14 +30,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="bottom"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="10dp">
 
-            <Button
+            <com.kusu.loadingbutton.LoadingButton
                 android:id="@+id/buttonAuth"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/sign_in" />
+                android:text="@string/sign_in"
+                app:lb_cornerRadius="16dp"/>
         </LinearLayout>
     </com.google.android.material.textfield.TextInputLayout>
 

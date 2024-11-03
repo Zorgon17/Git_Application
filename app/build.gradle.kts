@@ -86,6 +86,8 @@ dependencies {
     implementation ("androidx.recyclerview:recyclerview:1.2.1")
     //Navigation
     implementation("androidx.navigation:navigation-fragment:2.8.1")
+    //library for loading-button
+    implementation ("com.github.koushikcse:LoadingButton:1.7")
 
 }
 

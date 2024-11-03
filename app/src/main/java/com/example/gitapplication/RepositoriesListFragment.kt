@@ -25,49 +25,46 @@ import kotlinx.coroutines.launch
 class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnItemClickListener {
 
     private val viewModel: RepositoriesListViewModel by viewModels()
-
     private var binding: RecyclerviewFragmentBinding? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Инициализация binding
         binding = RecyclerviewFragmentBinding.bind(view)
 
         // Настройка Toolbar
         val toolbar: Toolbar = binding?.appbar?.toolbar ?: return
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
-
-        // Установка заголовка
         (activity as AppCompatActivity).supportActionBar?.title = "Repositories"
 
-        //непосредственно биндим кнопку и appbar при нажатии сбрасываем весь стек навигации к AuthFragment
+        // Навигация к AuthFragment
         binding?.appbar?.actionButton?.setOnClickListener {
             findNavController().popBackStack(R.id.AuthFragment, false)
         }
 
-        //биндим RecyclerView
+        // RecyclerView и адаптер
         val repoRecycler: RecyclerView = binding!!.repositoryRecyclerView
         val repoAdapter = RepoAdapter(this)
-
-        // Устанавливаем LayoutManager и адаптер
         repoRecycler.layoutManager = LinearLayoutManager(context)
         repoRecycler.adapter = repoAdapter
 
-        viewLifecycleOwner.lifecycleScope.launch{
+        // Управление состояниями загрузки
+        viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.repoListUiState.collect { state ->
-                    when(state){
+                    when (state) {
                         is RepositoriesListState.Loading -> {
-                            // Показать экран загрузки
+                            binding?.progressBar?.visibility = View.VISIBLE
+                            binding?.repositoryRecyclerView?.visibility = View.GONE
                         }
                         is RepositoriesListState.Success -> {
-                            // Обновить данные адаптера
+                            binding?.progressBar?.visibility = View.GONE
+                            binding?.repositoryRecyclerView?.visibility = View.VISIBLE
                             repoAdapter.data = state.repositories
                         }
                         is RepositoriesListState.Error -> {
-                            // Показать сообщение об ошибке
                             Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
                         }
+                        is RepositoriesListState.Empty -> {findNavController().navigate(RepositoriesListFragmentDirections.actionReposToEmpty())}
                     }
                 }
             }
@@ -86,7 +83,6 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
             amountOfWatchers = repository.countOfWatchers.toString(),
             owner = repository.owner?.login.toString()
         )
-
         findNavController().navigate(action)
     }
 
