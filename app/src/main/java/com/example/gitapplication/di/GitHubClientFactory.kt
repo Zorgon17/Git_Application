@@ -7,14 +7,14 @@ class GitHubClientFactory @Inject constructor(
     private val sharedPreferences: SharedPreferences
 ) {
     fun createGitHubClient(): GitHubClient {
-        val token = sharedPreferences.getString(TOKEN_PREF_NAME, null)
+        val token = sharedPreferences.getString(TOKEN_PREF_NAME, "null")
             ?: throw IllegalArgumentException("Token not found")
         return GitHubClient(token)
     }
 
     fun updateGitHubClient(): GitHubClient {
         // Создайте новый клиент с текущим токеном
-        val token = sharedPreferences.getString(TOKEN_PREF_NAME, null)
+        val token = sharedPreferences.getString(TOKEN_PREF_NAME, "null")
             ?: throw IllegalArgumentException("Token not found")
         return GitHubClient(token)
     }
