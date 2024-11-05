@@ -22,7 +22,7 @@ class AuthViewModel @Inject constructor(
 
     fun checkToken(accessToken: String) {
         if (accessToken.isBlank()) {
-            _authFragmentUiStateInside.value = AuthState.Error("Токен не может быть пустым")
+            _authFragmentUiStateInside.value = AuthState.Error("The token cannot be empty")
             return
         } else {
             viewModelScope.launch {
@@ -36,7 +36,7 @@ class AuthViewModel @Inject constructor(
                 if (userResponse != null) {
                     _authFragmentUiStateInside.value = AuthState.Success(userResponse.login)
                 } else {
-                    _authFragmentUiStateInside.value = AuthState.Error("Неверный токен")
+                    _authFragmentUiStateInside.value = AuthState.Error("Invalid token")
                 }
             }
         }

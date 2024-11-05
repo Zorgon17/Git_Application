@@ -14,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.gitapplication.databinding.FragmentAuthBinding
 import com.example.gitapplication.network.GitHubClientFactory
+import com.example.gitapplication.utils.isInternetAvailable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -56,12 +57,22 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.authFragmentUiState.collect { state ->
                     when (state) {
-                        is AuthViewModel.AuthState.Idle -> { /* Начальное состояние */ }
-                        is AuthViewModel.AuthState.Loading -> { binding!!.buttonAuth.showLoading() }
+                        is AuthViewModel.AuthState.Idle -> { /* Начальное состояние */
+                        }
+
+                        is AuthViewModel.AuthState.Loading -> {
+                            binding!!.buttonAuth.showLoading()
+                        }
+
                         is AuthViewModel.AuthState.Success -> {
-                            Toast.makeText(requireContext(), "Привет, дорогой ${state.login}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.hi_dear, state.login),
+                                Toast.LENGTH_SHORT
+                            ).show()
                             findNavController().navigate(AuthFragmentDirections.actionAuthToRepos())
                         }
+
                         is AuthViewModel.AuthState.Error -> {
                             binding!!.textInputEditTextAuth.error = state.message
                         }
@@ -74,7 +85,11 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
         binding!!.buttonAuth.setOnClickListener {
             val accessToken = textInputEditTextAuth.text.toString()
             prefsEditor.putString(TOKEN_PREF_NAME, accessToken).apply()
-            viewModel.checkToken(accessToken)  // передаем токен в ViewModel
+            if (isInternetAvailable(requireContext())) {
+                viewModel.checkToken(accessToken)  // Если интернет есть, выполняем checkToken
+            } else {
+                findNavController().navigate(AuthFragmentDirections.actionAuthToError())
+            }
         }
     }
 

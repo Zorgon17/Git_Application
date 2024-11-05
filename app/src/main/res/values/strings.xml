@@ -7,4 +7,9 @@
     <string name="check_your_internet_connection">Check your Internet connection</string>
     <string name="empty">Empty</string>
     <string name="no_repositories_at_the_moment">No repositories at the moment</string>
+    <string name="refresh">Refresh</string>
+    <string name="turning_on_the_internet_please">Turning on the Internet please</string>
+    <string name="hi_dear">Hi, dear %1$s</string>
+    <string name="description_of_the_repository">Description of the repository</string>
+    <string name="you_have_opened_the_repository">You have opened the repository: %1$s</string>
 </resources>

@@ -21,15 +21,16 @@ class DescriptionViewModel @Inject constructor(private val repository: GitHubRep
         viewModelScope.launch {
             try {
                 val content = repository.getReadMe(owner, repositoryName)
-                _descriptionFragmentUiState.value = DescriptionState.Success (content ?: "У данного приложения нет ReadMe")
+                _descriptionFragmentUiState.value = DescriptionState.Success (content ?: "This application does not have a ReadMe")
             } catch (e: Exception) {
-                _descriptionFragmentUiState.value = DescriptionState.Error ("Ошибка загрузки ReadMe: ${e.message}")
+                _descriptionFragmentUiState.value = DescriptionState.Error ("Error loading the ReadMe: ${e.message}")
             }
         }
     }
 
 
     sealed class DescriptionState {
+        data object OutOfInternet: DescriptionState()
         data object Loading : DescriptionState() // Когда идет загрузка
         data class Success(val content: String) : DescriptionState() // Успех
         data class Error(val message: String) : DescriptionState() // Ошибка с сообщением

@@ -12,6 +12,9 @@
         <action
             android:id="@+id/actionAuthToRepos"
             app:destination="@+id/ReposFragment" />
+        <action
+            android:id="@+id/actionAuthToError"
+            app:destination="@+id/ErrorFragment" />
     </fragment>
 
     <fragment
@@ -35,11 +38,20 @@
             app:destination="@+id/ReposFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/ErrorFragment"
+        android:name="com.example.gitapplication.screens.errorscreen.ErrorFragment"
+        tools:layout="@layout/connection_error_fragment">
+        <action
+            android:id="@+id/actionErrorToRepos"
+            app:destination="@+id/ReposFragment" />
+    </fragment>
+
 
     <fragment
         android:id="@+id/DescriptionFragment"
         android:name="com.example.gitapplication.DescriptionFragment"
-        tools:layout="@layout/fragment_description">
+        tools:layout="@layout/combined_description_fragment">
 
         <argument
             android:name="repositoryName"

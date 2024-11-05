@@ -11,95 +11,108 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.example.gitapplication.databinding.FragmentDescriptionBinding
+import com.example.gitapplication.databinding.CombinedDescriptionFragmentBinding
+import com.example.gitapplication.databinding.FragmentTopWithDescriptionBinding
+import com.example.gitapplication.databinding.ReadmeFragmentBinding
+import com.example.gitapplication.screens.errorscreen.ErrorFragment
+import com.example.gitapplication.utils.isInternetAvailable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class DescriptionFragment : Fragment(R.layout.fragment_description) {
+class DescriptionFragment : Fragment(R.layout.combined_description_fragment) {
 
     private val args: DescriptionFragmentArgs by navArgs()
     private val viewModel: DescriptionViewModel by viewModels()
 
-    private var binding: FragmentDescriptionBinding? = null
+    private var binding: FragmentTopWithDescriptionBinding? = null
+    private var combinedBinding: CombinedDescriptionFragmentBinding? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Используем View Binding для связывания верстки с кодом
-        binding = FragmentDescriptionBinding.bind(view)
+
+        // Инициализация combinedBinding
+        combinedBinding = CombinedDescriptionFragmentBinding.bind(view)
+        binding = FragmentTopWithDescriptionBinding.bind(combinedBinding!!.root)
 
         // Устанавливаем текстовые значения из аргументов
-        val owner: String = args.owner
-        val repositoryName: String = args.repositoryName
         binding?.link?.text = args.link
-        binding?.lessence?.text = "Описание репозитория"
+        binding?.lessence?.text = getString(R.string.description_of_the_repository)
         binding?.starCount?.text = args.amountOfStars
         binding?.forkCount?.text = args.amountOfForks
         binding?.watcherCount?.text = args.amountOfWatchers
 
         // Настройка Toolbar
-        val toolbar: Toolbar = binding?.appbar?.toolbar ?: return
+        val toolbar: Toolbar = combinedBinding?.appbar?.toolbar ?: return
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
-
-        // Установка заголовка
-        (activity as AppCompatActivity).supportActionBar?.title = repositoryName
-
-        // Включаем кнопку "Назад" в ActionBar
+        (activity as AppCompatActivity).supportActionBar?.title = args.repositoryName
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // Устанавливаем слушатель на кнопку "Назад"
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-        //непосредственно биндим кнопку и appbar при нажатии сбрасываем весь стек навигации к AuthFragment
-        binding?.appbar?.actionButton?.setOnClickListener {
+
+        combinedBinding?.appbar?.actionButton?.setOnClickListener {
             findNavController().popBackStack(R.id.AuthFragment, false)
         }
 
-        // Устанавливаем слушатель клика для текстового поля ссылки
         binding?.link?.setOnClickListener {
-            val url = args.link
-            openLink(url) // Открываем ссылку
+            openLink(args.link)
         }
 
-        // Загружаем README
-        viewModel.loadReadme(owner, repositoryName)
+        // Проверяем интернет-соединение
+        if (isInternetAvailable(requireContext())) {
+            viewModel.loadReadme(args.owner, args.repositoryName)
+        } else {
+            showConnectionErrorFragment()
+        }
 
         // Наблюдаем за состоянием
         lifecycleScope.launch {
             viewModel.descriptionFragmentUiState.collect { state ->
                 when (state) {
                     is DescriptionViewModel.DescriptionState.Loading -> {
-                        binding?.progressBar?.visibility = View.VISIBLE
-                        binding?.readmeTextView?.visibility = View.GONE
+                        //индикатор загрузки
                     }
                     is DescriptionViewModel.DescriptionState.Success -> {
-                        binding?.progressBar?.visibility = View.GONE
-                        binding?.readmeTextView?.visibility = View.VISIBLE
-                        binding?.readmeTextView?.text = state.content
+                        showReadmeFragment(state.content)
                     }
                     is DescriptionViewModel.DescriptionState.Error -> {
-                        binding?.readmeTextView?.text = state.message
+                        // ошибка
+                    }
+                    is DescriptionViewModel.DescriptionState.OutOfInternet -> {
+                        showConnectionErrorFragment()
                     }
                 }
             }
         }
     }
 
-    /**
-     * Функция, делающая ссылку в приложении кликабельной
-     */
-    private fun openLink(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse(url) // Установка ссылки
-        startActivity(intent) // Открытие ссылки в браузере
+    private fun showReadmeFragment(content: String) {
+        // Убедитесь, что вы не создаете новый binding каждый раз
+        val readmeBinding = ReadmeFragmentBinding.inflate(layoutInflater)
+        readmeBinding.readmeTextView.text = content
+        // Замените содержимое фрагмента на ReadMe
+        combinedBinding?.fragmentContainer?.removeAllViews()
+        combinedBinding?.fragmentContainer?.addView(readmeBinding.root)
     }
 
-    /**
-     * Чистим binding, чтобы не было утечки данных при пересоздании экрана
-     */
+    private fun showConnectionErrorFragment() {
+        val connectionErrorFragment = ErrorFragment()
+        // Заменяем текущий фрагмент на фрагмент ошибки подключения
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(combinedBinding?.fragmentContainer?.id ?: return, connectionErrorFragment)
+            .commit()
+    }
+
+    private fun openLink(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(intent)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+        combinedBinding = null // Освобождаем combinedBinding
     }
 }

@@ -2,8 +2,6 @@ package com.example.gitapplication
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gitapplication.AuthViewModel.AuthState
-import com.example.gitapplication.network.GitHubClient
 import com.example.gitapplication.network.GitHubRepository
 import com.example.gitapplication.pojomodel.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +35,7 @@ class RepositoriesListViewModel @Inject constructor(private val repository: GitH
                     }
                 }
             } catch (e: Exception) {
-                _repoListUiStateInside.value = RepositoriesListState.Error(message = "Ошибка загрузки репозиториев: ${e.localizedMessage}")
+                _repoListUiStateInside.value = RepositoriesListState.Error(message = "Error loading repositories: ${e.localizedMessage}")
             }
         }
     }

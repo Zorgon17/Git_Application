@@ -72,7 +72,8 @@ class RepositoriesListFragment : Fragment(R.layout.recyclerview_fragment), OnIte
     }
 
     override fun onItemClick(repository: Repository) {
-        Toast.makeText(context, "Вы открыли репозиторий: ${repository.name}", Toast.LENGTH_SHORT)
+        Toast.makeText(context,
+            getString(R.string.you_have_opened_the_repository, repository.name), Toast.LENGTH_SHORT)
             .show()
 
         val action = RepositoriesListFragmentDirections.actionReposToDescr(

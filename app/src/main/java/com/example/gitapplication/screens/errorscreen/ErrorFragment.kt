@@ -1,23 +1,25 @@
-package com.example.gitapplication.screens.emptyscreen
+package com.example.gitapplication.screens.errorscreen
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.gitapplication.AuthFragmentDirections
 import com.example.gitapplication.R
-import com.example.gitapplication.databinding.EmptyRepositoryFragmentBinding
+import com.example.gitapplication.databinding.ConnectionErrorFragmentBinding
+import com.example.gitapplication.utils.isInternetAvailable
 
-class EmptyFragment : Fragment(R.layout.empty_repository_fragment) {
-
-    private var binding: EmptyRepositoryFragmentBinding? = null
+class ErrorFragment : Fragment(R.layout.connection_error_fragment) {
+    private var binding: ConnectionErrorFragmentBinding? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = EmptyRepositoryFragmentBinding.bind(view)
+        binding = ConnectionErrorFragmentBinding.bind(view)
 
-        val buttonRetry = binding!!.buttonRefresh
+        val buttonRetry = binding!!.buttonRetry
 
         // Настройка Toolbar
         val toolbar: Toolbar = binding?.appbar?.toolbar ?: return
@@ -29,12 +31,21 @@ class EmptyFragment : Fragment(R.layout.empty_repository_fragment) {
             findNavController().popBackStack(R.id.AuthFragment, false)
         }
 
+
         buttonRetry.setOnClickListener {
-            findNavController().navigate(EmptyFragmentDirections.actionEmptyToRepos())
+            if (isInternetAvailable(requireContext())) {
+                findNavController().navigate(ErrorFragmentDirections.actionErrorToRepos())
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.turning_on_the_internet_please),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
         }
 
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
